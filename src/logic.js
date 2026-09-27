@@ -79,6 +79,10 @@ export async function generate(modelId, character, setting) {
     .replace(/^["'“]|["'”]$/g, "")
     .trim();
 
+  // Fall back to a deterministic starter built from the user's exact inputs
+  // whenever the model refused, rambled past a sane length, or drifted away
+  // from the requested character/setting — this guarantees the story
+  // starter always stays on-topic even if the on-device model misbehaves.
   const story = looksUnusable(text) || !mentionsBoth(text, character, setting)
     ? FALLBACK(character, setting)
     : text;
