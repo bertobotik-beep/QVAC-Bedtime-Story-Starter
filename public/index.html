@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>QVAC Bedtime Story Starter</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: linear-gradient(160deg, #1b1f3b 0%, #2e2a5c 100%);
+    font-family: system-ui, -apple-system, sans-serif;
+    color: #e8e6ff;
+    display: flex;
+    justify-content: center;
+    padding: 46px 20px;
+  }
+  .wrap { width: 100%; max-width: 520px; text-align: center; }
+  .icon { font-size: 2rem; margin-bottom: 4px; }
+  h1 { font-size: 1.6rem; margin: 0 0 6px; color: #c9c3ff; font-weight: 800; }
+  .subtitle { color: #a8a2d9; margin-bottom: 24px; font-size: 0.9rem; }
+  .card {
+    background: #262351;
+    border: 2px solid #454084;
+    border-radius: 20px;
+    padding: 30px 26px;
+  }
+  input[type=text] {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 2px solid #454084;
+    background: #1e1b42;
+    color: #e8e6ff;
+    font-family: inherit;
+    font-size: 1rem;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+  input[type=text]::placeholder { color: #7b76ad; }
+  button.action {
+    padding: 12px 28px;
+    border: none;
+    border-radius: 999px;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    background: #7b6ef0;
+    color: #fff;
+    box-shadow: 0 5px 0 #4c40b0;
+    margin-top: 4px;
+  }
+  button.action:active { transform: translateY(3px); box-shadow: 0 2px 0 #4c40b0; }
+  button.action:disabled { opacity: 0.4; cursor: not-allowed; }
+  .status { margin-top: 14px; font-size: 0.85rem; color: #a8a2d9; min-height: 1.2em; }
+  .result-body { font-size: 1.05rem; line-height: 1.7; margin: 20px 0 4px; color: #e8e6ff; text-align: left; font-style: italic; }
+  .footer-note { color: #a8a2d9; font-size: 0.78rem; margin-top: 20px; }
+  .spinner {
+    display: inline-block;
+    width: 13px; height: 13px;
+    border: 2px solid #454084;
+    border-top-color: #c9c3ff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="icon">🌙</div>
+    <h1>Bedtime Story Starter</h1>
+    <p class="subtitle">Enter a character and a setting, get a short opening paragraph to spark a story. 100% on-device.</p>
+
+    <div class="card">
+      <input type="text" id="characterInput" placeholder="Character, e.g. a curious little owl named Pip" />
+      <input type="text" id="settingInput" placeholder="Setting, e.g. an old lighthouse by the sea" />
+      <button class="action" id="generateBtn">Write My Starter</button>
+      <div class="status" id="status"></div>
+      <div id="resultBox"></div>
+    </div>
+
+    <p class="footer-note">Everything runs locally on your machine. No text ever leaves this device.</p>
+  </div>
+
+  <script>
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    const characterInput = document.getElementById('characterInput');
+    const settingInput = document.getElementById('settingInput');
+    const generateBtn = document.getElementById('generateBtn');
+    const status = document.getElementById('status');
+    const resultBox = document.getElementById('resultBox');
+
+    async function generate() {
+      const character = characterInput.value.trim();
+      const setting = settingInput.value.trim();
+      if (!character || !setting) return;
+      generateBtn.disabled = true;
+      resultBox.innerHTML = '';
+      status.innerHTML = '<span class="spinner"></span>Dimming the lights...';
+
+      try {
+        const res = await fetch('/api/story', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ character, setting }),
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        status.textContent = '';
+        resultBox.innerHTML = `<div class="result-body">${escapeHtml(data.story)}</div>`;
+      } catch (err) {
+        status.textContent = 'Error: ' + err.message;
+      } finally {
+        generateBtn.disabled = false;
+      }
+    }
+
+    generateBtn.addEventListener('click', generate);
+    settingInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') generate(); });
+    characterInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') generate(); });
+  </script>
+</body>
+</html>

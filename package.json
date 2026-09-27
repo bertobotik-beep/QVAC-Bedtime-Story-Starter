@@ -1,0 +1,25 @@
+{
+  "name": "qvac-bedtime-story-starter",
+  "version": "1.0.0",
+  "description": "Enter a character and a setting and an on-device AI writes a short opening paragraph for a bedtime story using those specifics. No cloud call, no API key.",
+  "type": "module",
+  "main": "src/gui.js",
+  "scripts": {
+    "start": "node src/gui.js",
+    "gui": "node src/gui.js"
+  },
+  "keywords": [
+    "qvac",
+    "on-device-ai",
+    "storytelling",
+    "llm",
+    "offline-ai"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@qvac/sdk": "^0.19.0"
+  },
+  "engines": {
+    "node": ">=22.17"
+  }
+}
